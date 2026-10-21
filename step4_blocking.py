@@ -47,7 +47,10 @@ def heavy_compute() -> int:
 
 async def handle_request(client: str, duration: float) -> None:
     log(f"{client}: запрос принят")
-    await asyncio.sleep(duration)
+    if client == "bob":
+      heavy_compute()
+    else:
+      await asyncio.sleep(duration)
     log(f"{client}: ответ отправлен")
 
 
