@@ -26,8 +26,10 @@ async def work(n: int) -> None:
 
 
 async def main() -> None:
+    tasks = []
     for i in range(N):
-      await work(i + 1)
+      tasks.append(work(i + 1))
+    await asyncio.gather(*tasks)
 
 
 if __name__ == "__main__":
