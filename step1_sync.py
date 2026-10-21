@@ -13,13 +13,18 @@ import time
 
 from timer import print_time
 
+N = 10
 
 def work(n: int) -> None:
-    ...
+    print(f'start {n}')
+    time.sleep(1)
+    print(f'done {n}')
 
 
 def main() -> None:
-    ...
+    for i in range(N):
+        work(i + 1)
+
 
 
 if __name__ == "__main__":
