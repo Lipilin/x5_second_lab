@@ -25,6 +25,7 @@ heavy_compute. Она синхронная и работает 1-3 секунд�
 """
 
 import asyncio
+from concurrent.futures import ProcessPoolExecutor
 
 from timer import log, print_time
 
@@ -32,8 +33,8 @@ CLIENTS = [
     ("alice", 0.5),
     ("bob", 5.0),
     ("carol", 0.5),
-    ("dave", 0.5),
-    ("eve", 0.5),
+    ("dave", 5.0),
+    ("eve", 5.0),
 ]
 
 
@@ -44,19 +45,24 @@ def heavy_compute() -> int:
         h = (h * 31 + i) & 0xFFFFFFFF
     return h
 
-
-async def handle_request(client: str, duration: float) -> None:
+async def handle_request(client: str, duration: float, pool: ProcessPoolExecutor) -> None:
     log(f"{client}: запрос принят")
-    if client == "bob":
-      heavy_compute()
+    if client == "bob" or client == "dave" or client == "eve":
+      # Вариант 1  await asyncio.to_thread(heavy_compute)
+      # Вариант 2
+      loop = asyncio.get_running_loop()
+      await loop.run_in_executor(pool, heavy_compute)
     else:
       await asyncio.sleep(duration)
+
     log(f"{client}: ответ отправлен")
 
 
 async def main() -> None:
-    coroutines = [handle_request(client, duration) for client, duration in CLIENTS]
-    await asyncio.gather(*coroutines)
+    with ProcessPoolExecutor() as pool:
+
+      coroutines = [handle_request(client, duration, pool) for client, duration in CLIENTS]
+      await asyncio.gather(*coroutines)
 
 
 if __name__ == "__main__":
